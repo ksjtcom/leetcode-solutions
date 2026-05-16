@@ -1,0 +1,55 @@
+273. 整数转换英文表示
+题目链接：https://leetcode.cn/problems/integer-to-english-words/description/
+
+一、核心思想
+    1.需要准备三个基础单词库
+        1-19：一个单词库
+        20-90的十位数单词。
+        大单位单词：“Thousand”,"Million","Billion"等。
+    2.三位分组
+        从数字的右边开始，每三位一组进行拆分，例如：数字1234567，可以拆分为1，234，567三组。
+    3.分块处理
+        编写一个helper辅助函数，他只能处理0-999的数字，并将其转换成对应的英文
+    4.组合结果
+        将分组后的每一块按(高位到地位)用helper函数转换，然后紧跟对应单位，最后将其拼接起来。
+
+三、Java代码实现
+class Solution {
+
+    String[] singles = { "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven",
+            "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen" };
+    String[] tens = { "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" };// 补两个空格是为了能够对上索引
+    String[] thousands = { "", "Thousand", "Million", "Billion" };
+
+    public String numberToWords(int num) {
+        if (num == 0) {
+            return "Zero";
+        }
+        String res = "";
+        // 按照每三位一组的规律
+        for (int i = 0; i < thousands.length; i++) {
+            if (num % 1000 != 0) {
+                res = Helper(num % 1000) + thousands[i] + " " + res;
+            }
+            num /= 1000;
+        }
+        return res.trim();// 去掉尾部多余的空格字符
+    }
+
+    private String Helper(int num) {
+        if (num == 0)
+            return "";
+
+        if (num < 20)
+            return singles[num] + " ";
+
+        // 小于100
+        if (num < 100)
+            return tens[num / 10] + " " + Helper(num % 10);
+        return singles[num / 100] + " Hundred " + Helper(num % 100);// 否则就是处理100以上但是不超过999的。
+    }
+}
+
+四、复杂度分析
+    时间复杂度：O(n) // 每三个数字一组。
+    空间复杂度：O(n) 

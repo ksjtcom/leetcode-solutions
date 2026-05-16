@@ -1,0 +1,68 @@
+208. 实现 Trie (前缀树)
+题目链接：https://leetcode.cn/problems/implement-trie-prefix-tree/description/
+
+一、字典树介绍
+    字典树(前缀树)是一种树形数据结构，用于高效存储和检索字符串数据集中的键，常见的应用场景有：搜索引擎的自动补全，拼写单词检查与纠错，本题就是一个字典树的模板题，创建、查找与搜索。
+
+二、字典树特征
+    (1)字典树根节点为空。
+    (2)每个节点存储一个单词/字母，从根节点到某一节点，路径上经过的字符串连接起来，构成该节点对应的字符串。
+    (3)每个非叶子节点会被使用多次，以提高遍历时的效率。
+
+
+三、c++实现代码：
+struct TNode {
+    TNode* ch[26];
+    bool isEnd;
+    TNode() {
+        memset(ch, NULL, sizeof(ch));
+        isEnd = false;
+    }
+};
+
+class Trie {
+
+    TNode* root;
+
+public:
+    Trie() { root = new TNode(); }
+
+    void insert(string word) {
+        TNode* p = root;
+        for (char c : word) {
+            if (p->ch[c - 'a'] == NULL) {
+                p->ch[c - 'a'] = new TNode();
+            }
+            p = p->ch[c - 'a'];
+        }
+        p->isEnd = true;
+    }
+
+    bool search(string word) {
+        TNode* p = root;
+        for (char c : word) {
+            if (p->ch[c - 'a'] == NULL) {
+                return false;
+            }
+            p = p->ch[c - 'a'];
+        }
+        return p->isEnd;
+    }
+
+    bool startsWith(string prefix) {
+        TNode* p = root;
+        for (char c : prefix) {
+            if (p->ch[c - 'a'] == NULL) {
+                return false;
+            }
+            p = p->ch[c - 'a'];
+        }
+        return p != NULL;
+    }
+};
+
+四、复杂度分析
+时间复杂度：O(L)，L为字符串的长度
+空间复杂度：O(n*L)，n个单词，平均长度L。
+
+

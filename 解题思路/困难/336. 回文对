@@ -1,0 +1,74 @@
+336. 回文对
+题目链接：https://leetcode.cn/problems/palindrome-pairs/description/
+
+一、核心思想
+    把一个字符串拆分成两组，前缀和后缀，看能不能和另外一个单词组成回文。
+    解决问题的关键在于认识到，如果两个单词 a 和 b 拼接成回文串，那么a（或 b）中较长的那个一定可以被拆分成两个部分，一部分与另一个单词互为反转，另一部分自身就是回文。
+    假设 a 的长度大于等于 b，且 a + b 能构成回文串。我们可以尝试对 a 进行拆分：a = a1 + a2
+    如果 a1 是回文串，那么 a2 的反转必然等于 b。
+    如果 a2 是回文串，那么 a1 的反转必然等于 b。
+    这样，问题就转化为：对于每一个单词 word，我们枚举所有可能的前缀和后缀。检查其中一部分是否是回文串，如果是，再看另一部分的反转字符串是否存在于单词列表中。若存在，则找到一对有效的回文对。
+
+
+二、Java代码实现
+class Solution {
+    // 判断回文串函数
+    private boolean isHui(String word) {
+        int l = 0, r = word.length() - 1;
+        while (l < r) {
+            if (word.charAt(l) != word.charAt(r)) {
+                return false;
+            }
+            l++;
+            r--;
+        }
+        return true;
+    }
+
+    public List<List<Integer>> palindromePairs(String[] words) {
+        List<List<Integer>> res = new ArrayList<>();
+        HashMap<String, Integer> map = new HashMap<>();
+        // 哈希表，用于快速查找单词是否存在
+        for (int i = 0; i < words.length; i++) {
+            map.put(words[i], i);
+        }
+
+        for (int i = 0; i < words.length; i++) {
+            int m = words[i].length();
+
+            // 将当前单词分成prefix + suffix两部分。
+            // j表示切点。
+            // j = 0时，prefix为空串，j = m时suffix为空串。
+            for (int j = 0; j <= m; j++) {
+                String prefix = words[i].substring(0, j);
+                String suffix = words[i].substring(j);
+
+                // 情况1：前缀是回文
+                // 此时如果存在 reverse(suffix) 这个单词，可以构成：reverse(suffix) + words[i]
+                // 因为 reverse(suffix) + suffix 是回文，再加上回文前缀整体仍是回文
+                // 注意：j > 0 避免空串重复处理（空串处理会在 j=m 时被情况2覆盖）
+                if (j > 0 && isHui(prefix)) {
+                    String rev = new StringBuilder(suffix).reverse().toString();
+                    if (map.containsKey(rev) && map.get(rev) != i) {
+                        res.add(Arrays.asList(map.get(rev), i));
+                    }
+                }
+
+                // 情况2：后缀是回文
+                // 此时如果存在 reverse(prefix) 这个单词，可以构成：words[i] + reverse(prefix)
+                // 因为 prefix + reverse(prefix) 是回文，再加上回文后缀整体仍是回文
+                if (isHui(suffix)) {
+                    String rev = new StringBuilder(prefix).reverse().toString();
+                    if (map.containsKey(rev) && map.get(rev) != i) {
+                        res.add(Arrays.asList(i, map.get(rev)));
+                    }
+                }
+            }
+        }
+        return res;
+    }
+}
+
+三、复杂度分析
+时间复杂度：O(n*L^2), 因为每个单词拆分成L段，每段需要判断回文。
+空间复杂度：O(n)存储哈希表

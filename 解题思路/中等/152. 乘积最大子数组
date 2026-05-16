@@ -1,0 +1,38 @@
+152. 乘积最大子数组
+题目链接：https://leetcode.cn/problems/maximum-product-subarray/description/
+
+一、核心思路
+
+    1.对于乘法，我们需要注意：负数乘以负数变成整数，最小值可能为负数、但没准下一步乘以一个负数之后，乘积就变成了最小值了。
+    动态规划转移方程：
+        int t = maxp;
+        maxp = max({nums[i] , nums[i] * maxp , minp * nums[i]});
+        minp = min({nums[i] , t * nums[i] , minp * nums[i]});
+    2.其实本题要求的是一个连续的序列，本题可以参考一下最大字段和。其代码逻辑相似，也是动态规划。
+    
+二、c++代码实现：
+class Solution {
+public:
+    int maxProduct(vector<int>& nums) {
+        int n = nums.size();
+        if (n <= 1) {
+            return nums[0];
+        }
+        int ans = nums[0];
+        int maxp = nums[0];
+        int minp = nums[0];
+        for (int i = 1; i < n; i++) {
+            int t = maxp; // 保存之前最大乘积。
+            maxp = max({nums[i], t * nums[i], minp * nums[i]});
+            // 最大值有三种情况总共：1.当前元素最大，2.之前的最大乘上当前元素依然最大，3.如果当前元素为负数，乘上之前最小元素成为了最大值。
+            minp = min({nums[i], minp * nums[i], t * nums[i]});
+            // 最小值的情况：1.要么当前元素是小的，2.要么就是之前元素最小乘上当前元素称为最小，3.还有就是之前的最大的乘数，乘上当前数变成负数之后，就成为最小的了。
+            ans = max(ans, maxp);
+        }
+        return ans;
+    }
+};
+
+三、复杂度分析
+时间复杂度：O(n)
+空间复杂度：O(1)，没有开辟额外的数组进行存储元素值。

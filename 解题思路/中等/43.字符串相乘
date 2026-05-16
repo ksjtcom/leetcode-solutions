@@ -1,0 +1,80 @@
+解题思路：
+一、核心思想
+    我们不能把字符串直接转换成数字，会溢出，而是模拟竖式乘法，用数组记录每一位的乘积，最后进行进位处理。
+    注意：不能出现前导0
+
+二、步骤拆解
+    第一步：反转字符串
+        StringBuilder s1 = new StringBuilder(num1).reverse();
+        StringBuilder s2 = new StringBuilder(num2).reverse();
+    反转后个位在索引0的位置，方便后续计算时对齐数位。
+    第二步：逐位进行相乘、并累加到数组
+        for (int i = 0; i < n2; i++) {
+            int c2 = s2.charAt(i) - '0';
+            for (int j = 0; j < n1; j++) {
+                int c1 = s1.charAt(j) - '0';
+                arr[i + j] += c1 * c2;
+            }
+        }
+    第三步：统一处理进位
+        // 处理进位
+        int se = 0;
+        for (int i = 0; i < arr.length; i++) {
+            int sum = arr[i] + se;// 累加进位
+            arr[i] = sum % 10;// 
+            se = sum / 10;
+        }
+    第四步：处理前导0，并拼接结果
+
+
+三、Java代码：
+class Solution {
+    public String multiply(String num1, String num2) {
+        StringBuilder ret = new StringBuilder();
+
+        int n1 = num1.length();
+        int n2 = num2.length();
+
+        int[] arr = new int[n1 + n2];
+        StringBuilder s1 = new StringBuilder(num1).reverse();
+        StringBuilder s2 = new StringBuilder(num2).reverse();
+
+        for (int i = 0; i < n2; i++) {
+            int c2 = s2.charAt(i) - '0';
+            for (int j = 0; j < n1; j++) {
+                int c1 = s1.charAt(j) - '0';
+                arr[i + j] += c1 * c2;
+            }
+        }
+
+        // 处理进位
+        int se = 0;
+        for (int i = 0; i < arr.length; i++) {
+            int sum = arr[i] + se;// 累加进位
+            arr[i] = sum % 10;// 
+            se = sum / 10;
+        }
+        // 处理前导0
+        boolean isZero = false;
+        for (int i = arr.length - 1; i >= 0; i--) {
+            if (!isZero) {
+                if (arr[i] == 0) {
+                    continue;
+                } else {
+                    isZero = true;
+                }
+            }
+            if (isZero) {
+                ret.append(arr[i]);
+            }
+        }
+        if(ret.length()==0){
+            return "0";
+        }
+        return ret.toString();
+    }
+} 
+
+四、复杂度分析
+    时间复杂度：O(n1 × n2)，两层循环遍历两个字符串的所有位
+    空间复杂度：O(n1 + n2)，数组长度等于两个字符串长度之和

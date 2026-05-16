@@ -1,0 +1,50 @@
+LCR 082. 组合总和 II
+题目链接：https://leetcode.cn/problems/4sjJUc/description/
+
+一、解题思路(回溯+剪枝+排序)
+    1.排序预处理
+        对输入数组进行升序排序，方便后续剪枝优化，即nums[i] > target:break;
+        便于跳过同一层中重复元素。
+    2.递归函数内部逻辑
+        见详细代码解释。
+
+
+二、Java代码实现
+class Solution {
+    int[] nums;
+    int len;
+    List<List<Integer>> res = new ArrayList<>();
+    List<Integer> temp = new ArrayList<>();
+
+    public void dfs(int start, int target) {
+        if (target == 0) {// 若target==0，说明找到一个合法组合。
+            res.add(new ArrayList<>(temp));
+            return;
+        }
+        for (int i = start; i < len; i++) {
+            if (i > start && nums[i] == nums[i - 1]) {// 去重，同一层当中有相同元素，进行跳过。
+                continue;
+            }
+
+            // [1,1,6]注意1，1不是同一层递归当中添加的，而是当前层递归和下一层递归组合起来的。所以可以保证解集不包含重复的组合。
+            if (nums[i] > target) {// 剪枝，因为数组已排序，如果当前元素大于target，说明后续元素都大，直接continue。
+                break;
+            }
+            temp.add(nums[i]);
+            dfs(i + 1, target - nums[i]);
+            temp.remove(temp.size()-1);// 回溯
+        }
+    }
+
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        Arrays.sort(candidates);
+        this.nums = candidates;
+        this.len = candidates.length;
+        dfs(0, target);
+        return res;
+    }
+}
+
+三、复杂度分析
+    时间复杂度：O(2^n)
+    空间复杂度：O(n)

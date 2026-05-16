@@ -1,0 +1,83 @@
+84. 柱状图中最大的矩形
+题目链接：https://leetcode.cn/problems/largest-rectangle-in-histogram/description/
+
+一、核心思路
+    1.对于当前柱子，找到左边第一个比他矮的柱子位置，同时对于当前柱子，找到右边第一个比他矮的的柱子，这样柱子的宽度就确定了。
+    2.确定最矮的柱子位置，我们使用单调栈来优化算法的复杂度。
+    3.公式：面积 = 高度 × (右边第一个更矮的位置 - 左边第一个更矮的位置 - 1)。// -1是为了不能最矮柱子本身
+
+二、步骤拆解
+    1.找到左边第一个最矮的柱子算法如下(Java代码示例)：
+        int[] prefix = new int[n];
+        Stack<Integer> st = new Stack<>();
+        // 找到左边第一个比他小的柱子
+        for (int i = 0; i < n; i++) {
+            while (!st.isEmpty() && heights[i] <= heights[st.peek()]) {
+                st.pop();
+            }
+            if (st.isEmpty()) {
+                prefix[i] = -1;// 由于最左边是没有柱子的，
+            } else
+                prefix[i] = st.peek();
+            st.push(i);
+        }
+    同理，右边第一根最矮的柱子也如上述代码。
+    2.图解示例
+        假设 heights = [2, 1, 5, 6, 2, 3]
+            索引:    0   1   2   3   4   5
+            高度:    2   1   5   6   2   3
+            以索引2（高度5）为例：
+            左边第一个比5矮的是索引1（高度1）
+            右边第一个比5矮的是索引4（高度2）
+            宽度 = 4 - 1 - 1 = 2 // 求得宽度
+            面积 = 5 × 2 = 10 // 求得面积
+
+三、Java代码实现：
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        //对于每个柱子，找到它左边和右边第一个比它矮的柱子，这个柱子的最大宽度就确定了。   
+        int n = heights.length;
+        // 两次遍历
+        int[] prefix = new int[n];
+        int[] suffix = new int[n];
+        Stack<Integer> st = new Stack<>();
+        // 找到左边第一个比他小的柱子
+        for (int i = 0; i < n; i++) {
+            while (!st.isEmpty() && heights[i] <= heights[st.peek()]) {
+                st.pop();
+            }
+            if (st.isEmpty()) {
+                prefix[i] = -1;
+            } else
+                prefix[i] = st.peek();
+            st.push(i);
+        }
+
+        // 找到右边第一个比他小的元素
+        st.clear();
+        for (int i = n - 1; i >= 0; i--) {
+            while (!st.isEmpty() && heights[i] <= heights[st.peek()]) {
+                st.pop();
+            }
+            if (st.isEmpty()) {
+                suffix[i] = n;
+            } else
+                suffix[i] = st.peek();// 栈中存储的是数组下标
+            st.push(i);
+        }
+        int area = 0;
+
+        for (int i = 0; i < n; i++) {
+            int left = prefix[i];// 获取左边第一个比他小的元素位置
+            int right = suffix[i];// 获取右边第一个比他的小的元素位置。
+            // 由于题目要求的是柱状图中最大矩形的面积。
+            // 所以这里对于每条柱子都要计算他，是否比之前计算过的柱子面积要更大
+            area = Math.max(area, heights[i] * (right - left - 1));
+        }
+        return area;
+    }
+}
+
+四、算法复杂度分析
+    1.时间复杂度：O(n)，一次遍历即可。
+    2.空间复杂度: O(n)，存最矮柱子的下标

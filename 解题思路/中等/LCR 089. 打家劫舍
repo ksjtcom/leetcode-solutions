@@ -1,0 +1,34 @@
+LCR 089. 打家劫舍
+题目链接：https://leetcode.cn/problems/Gu0c2T/
+
+一、核心思路
+    本题是关于动态规划算法类的题目，故需要采用动态规划思路，题目大意是不能够重复偷两间相邻房间内的宝藏，最终使现金和最大。
+    由于题目说不能相邻，对于dp[i],如果偷dp[i]，则不能偷上一家dp[i-1],如果不偷这家，那么总金额为dp[i-1]。
+    故状态转移方程为：dp[i] = max(dp[i - 2] + nums[i] , dp[i - 1]);
+    dp[i - 2] + nums[i]即偷上上家和当前这家。
+    dp[i - 1]即偷了上家，不能偷这家。
+    本题就两种状态，偷和不偷当前这家。
+
+二、c++代码实现
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> dp(n, 0);
+        int first = max(nums[0], nums[1]);
+        if (n <= 1) {
+            return nums[0];
+        }
+        dp[0] = nums[0];
+        dp[1] = max(nums[0], nums[1]);
+        for (int i = 2; i < n; i++) {
+            dp[i] = max(dp[i - 2] + nums[i], dp[i - 1]);
+        }
+
+        return dp[n - 1];
+    }
+};
+
+三、复杂度分析
+时间复杂度：O(n)，一次遍历即可。
+空间复杂度：O(n)，存储dp数组。

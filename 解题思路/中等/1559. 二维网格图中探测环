@@ -1,0 +1,68 @@
+1559. 二维网格图中探测环
+题目地址：https://leetcode.cn/problems/detect-cycles-in-2d-grid/description/
+
+一、核心思路  
+    环必须由相同字母构成，不同字母之间的环不计入连接。
+
+二、算法选择：
+    使用dfs+父节点记录
+    为什么选择dfs？
+        环的本质实在无向图中存在回路
+        dfs天然适合检测环：在遍历过程中，如果遇到已经访问过的节点且不是父节点，说明存在环。
+    为什么需要记录父节点？
+        防止把“回头路”误判成环，例如：A->B->A,这不是环，这只是原路返回。通过父节点，可以避免这种误判。
+
+具体代码详细如下：
+三、Java代码：
+class Solution {
+    int[][] dir = { { 0, -1 }, { 0, 1 }, { 1, 0 }, { -1, 0 } };
+    char[][] grid;
+    int n, m;
+    boolean[][] vis;
+
+    
+    // 不能主动保证检测的网格格子 > 4，但在网格的移动规则下，检测到的环天然 ≥ 4
+    public boolean dfs(int x, int y, int px, int py, char c) {
+        vis[x][y] = true;// 标记当前位置，设置为已访问
+
+        for (int[] d : dir) { // 遍历四个方向
+            int nx = x + d[0];
+            int ny = y + d[1];
+            if (nx < 0 || ny < 0 || nx >= n || ny >= m) { // 判断是否越界。
+                continue;
+            }
+            if (nx == px && ny == py) // 如果这个位置是父节点，不用去判断，跳过。
+                continue;
+            if (grid[nx][ny] != c) // 如果这个位置的字母与父字母不一样，直接continue。
+                continue;
+            if (vis[nx][ny]) { // 已经访问过，说明出现环了。直接return true。
+                return true;
+            }
+            if (dfs(nx, ny, x, y, c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean containsCycle(char[][] grid) {
+        this.grid = grid;
+        this.n = grid.length;
+        this.m = grid[0].length;
+        vis = new boolean[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (!vis[i][j]) {// 未访问过
+                    if (dfs(i, j, -1, -1, grid[i][j])) {// 递归找环
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+}
+
+四、复杂度分析
+    时间复杂度：O(n*m)，每个格子最多访问一次。
+    空间复杂度：O(n*m)，vis的开辟空间为n*m。
