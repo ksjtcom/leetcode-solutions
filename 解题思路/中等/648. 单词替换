@@ -1,0 +1,65 @@
+
+
+
+代码实现：
+  class Trie {
+  public:
+      Trie* ch[26];
+      bool isEnd;
+      Trie() {
+          memset(ch, NULL, sizeof(ch));
+          isEnd = false;
+      }
+  };
+  
+  class Solution {
+  public:
+      string replaceWords(vector<string>& dictionary, string sentence) {
+          // 对词根进行建立字典树
+          Trie* root = new Trie();
+          for (string s : dictionary) {
+              insert(s, root);
+          }
+  
+          stringstream ss(sentence);
+          string word;
+          string ans = "";
+          while (ss >> word) {
+              if (prefix(root, word) == "")
+                  ans += word + " ";
+              else {
+                  ans += prefix(root, word) + " ";
+              }
+          }
+          return ans.substr(0, ans.size() - 1);
+      }
+  
+      string prefix(Trie* root, string s) {
+          string ans = "";
+          Trie* node = root;
+          for (char c : s) {
+              if (node->isEnd) {
+                  return ans;
+              }
+              if (node->ch[c - 'a'] != NULL) {
+                  ans += c;
+                  node = node->ch[c - 'a'];
+              } else {
+                  return "";
+              }
+          }
+          return ans;
+      }
+  
+      // 建立字典树
+      void insert(string word, Trie* root) {
+          Trie* node = root;
+          for (char c : word) {
+              if (node->ch[c - 'a'] == NULL) {
+                  node->ch[c - 'a'] = new Trie();
+              }
+              node = node->ch[c - 'a'];
+          }
+          node->isEnd = true;
+      }
+  };
