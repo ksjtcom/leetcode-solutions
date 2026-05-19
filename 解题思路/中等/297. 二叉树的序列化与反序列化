@@ -1,0 +1,80 @@
+
+
+c++代码实现：
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Codec {
+public:
+    // Encodes a tree to a single string.
+
+    string serialize(TreeNode* root) { // 序列化，序列化是层序遍历
+        string ans = "";
+        if (root == NULL)
+            return "";
+        queue<TreeNode*> qe;
+
+        qe.push(root);
+        while (!qe.empty()) {
+            TreeNode* r = qe.front();
+            qe.pop();
+            if (r == NULL) {
+                ans += "null,";
+            } else {
+                ans += to_string(r->val) + ",";
+                qe.push(r->left);
+                qe.push(r->right);
+            }
+        }
+        return ans.substr(0, ans.size() - 1);// 去除末尾多余括号
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) { // 二叉树的反序列化，还是按照层序来
+        if (data == "")
+            return NULL;
+        stringstream ss(data);
+        string word;
+        queue<string> nums; // 添加字符串
+        while (getline(ss, word, ',')) {
+            nums.push(word);
+        }
+        // 得到nums队列之后
+        TreeNode* root = new TreeNode(stoi(nums.front()));
+        nums.pop(); // 第一层已经构建好了。
+        queue<TreeNode*> tq;
+        tq.push(root);
+        while (!tq.empty() && !nums.empty()) {
+            TreeNode* r = tq.front();
+            tq.pop();
+
+            if (!nums.empty()) {
+                string t = nums.front();
+                nums.pop();
+                if (t != "null") {
+                    r->left = new TreeNode(stoi(t));
+                    tq.push(r->left);
+                }
+            }
+            if (!nums.empty()) {
+                string t = nums.front();
+                nums.pop();
+                if (t != "null") {
+                    r->right = new TreeNode(stoi(t));
+                    tq.push(r->right);
+                }
+            }
+        }
+        return root;
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec ser, deser;
+// TreeNode* ans = deser.deserialize(ser.serialize(root));
